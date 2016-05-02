@@ -16,5 +16,4 @@ public:
 	virtual void ResizeEventProc(WINDOW_BUFFER_SIZE_RECORD);
 	virtual void ErrorExit(LPSTR, HANDLE, DWORD);
 };
-
 #endif
