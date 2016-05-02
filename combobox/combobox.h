@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 #include "iControl.h"
-
 using namespace std;
 
 class Combo : public iControl
