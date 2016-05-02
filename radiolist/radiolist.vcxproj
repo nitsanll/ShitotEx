@@ -142,10 +142,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="iControl.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="radioList.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="iControl.h" />
     <ClInclude Include="radioList.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

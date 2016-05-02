@@ -5,7 +5,7 @@
 
 using namespace std;
 
-HANDLE hStdin;
+HANDLE hStd;
 DWORD fdwSaveOldMode;
 
 
@@ -13,57 +13,31 @@ int main() {
 
 	DWORD cNumRead, fdwMode, i;
 	INPUT_RECORD irInBuf[128];
-	int counter = 0;
 	int startLine = 7;
 	int newLineY = startLine;
-	int clicked = 0;
-
-	vector<string> myList = { "[ ]hello", "[ ] hi", "[ ]love" };
-	//myList.insert("[]hello", 0);
-	RadioList RadioList(myList);
-
+	int counter = 0;
 	COORD c;
 	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	DWORD wAttr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-	SetConsoleTextAttribute(h, wAttr);
+	RadioList RadioList;
 
-	for (int i = 0; i < RadioList.GetList().size(); i++)
-	{
-		c = { startLine, newLineY++ };
-		SetConsoleCursorPosition(h, c);
-		cout << RadioList.GetList()[i] << endl;
-	}
-
-
-
-	//	CONSOLE_SCREEN_BUFFER_INFO cbi;
-	//	GetConsoleScreenBufferInfo(h, &cbi);
-	//	DWORD wAttr2 = cbi.wAttributes | BACKGROUND_RED;
-	//	SetConsoleTextAttribute(h, wAttr2);
-
-	CONSOLE_CURSOR_INFO cci = { 10, TRUE };
-	SetConsoleCursorInfo(h, &cci);
-
-	c = { startLine + 1, startLine };
-	SetConsoleCursorPosition(h, c);
 
 	// Get the standard input handle. 
 
-	hStdin = GetStdHandle(STD_INPUT_HANDLE);
-	if (hStdin == INVALID_HANDLE_VALUE)
-		RadioList.ErrorExit("GetStdHandle", hStdin, fdwSaveOldMode);
+	hStd = GetStdHandle(STD_INPUT_HANDLE);
+	if (hStd == INVALID_HANDLE_VALUE)
+		RadioList.ErrorExit("GetStdHandle", hStd, fdwSaveOldMode);
 
 	// Save the current input mode, to be restored on exit. 
 
-	if (!GetConsoleMode(hStdin, &fdwSaveOldMode))
-		RadioList.ErrorExit("GetConsoleMode", hStdin, fdwSaveOldMode);
+	if (!GetConsoleMode(hStd, &fdwSaveOldMode))
+		RadioList.ErrorExit("GetConsoleMode", hStd, fdwSaveOldMode);
 
 	// Enable the window and mouse input events. 
 
 	fdwMode = ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT;
-	if (!SetConsoleMode(hStdin, fdwMode))
-		RadioList.ErrorExit("SetConsoleMode", hStdin, fdwSaveOldMode);
+	if (!SetConsoleMode(hStd, fdwMode))
+		RadioList.ErrorExit("SetConsoleMode", hStd, fdwSaveOldMode);
 
 
 
@@ -72,11 +46,11 @@ int main() {
 		// Wait for the events. 
 
 		if (!ReadConsoleInput(
-			hStdin,      // input buffer handle 
+			hStd,      // input buffer handle 
 			irInBuf,     // buffer to read into 
 			128,         // size of read buffer 
 			&cNumRead)) // number of records read 
-			RadioList.ErrorExit("ReadConsoleInput", hStdin, fdwSaveOldMode);
+			RadioList.ErrorExit("ReadConsoleInput", hStd, fdwSaveOldMode);
 
 		// Dispatch the events to the appropriate handler. 
 
@@ -103,7 +77,7 @@ int main() {
 				break;
 
 			default:
-				RadioList.ErrorExit("Unknown event type", hStdin, fdwSaveOldMode);
+				RadioList.ErrorExit("Unknown event type", hStd, fdwSaveOldMode);
 				break;
 			}
 		}
@@ -111,7 +85,7 @@ int main() {
 
 	// Restore input mode on exit.
 
-	SetConsoleMode(hStdin, fdwSaveOldMode);
+	SetConsoleMode(hStd, fdwSaveOldMode);
 
 
 

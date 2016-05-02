@@ -2,26 +2,10 @@
 #include "label.h"
 using namespace std;
 
-Label::Label(char* lableText)
+Label::Label(char* lableText) :iControl({ 7,7 }, { 100,100 })
 {
 	input = lableText;
-}
-
-VOID Label::ErrorExit(LPSTR lpszMessage, HANDLE hStdin, DWORD fdwSaveOldMode)
-{
-	fprintf(stderr, "%s\n", lpszMessage);
-
-	// Restore input mode on exit.
-
-	SetConsoleMode(hStdin, fdwSaveOldMode);
-
-	ExitProcess(0);
-}
-
-VOID Label::ResizeEventProc(WINDOW_BUFFER_SIZE_RECORD wbsr)
-{
-	printf("Resize event\n");
-	printf("Console screen buffer is %d columns by %d rows.\n", wbsr.dwSize.X, wbsr.dwSize.Y);
+	draw();
 }
 
 VOID Label::SetLabel(char* newInput)
@@ -34,7 +18,25 @@ char* Label::GetLabel()
 	return input;
 }
 
-Label::~Label()
+void Label::draw()
 {
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD wAttr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+	SetConsoleTextAttribute(h, wAttr);
+	SetConsoleCursorPosition(h, position);
+	
+	printf("%c%c%c%c%c%c%c%c\n", '\xDA', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xBF');
 
+	COORD c = { position.X, position.Y + 1 };
+	SetConsoleCursorPosition(h, c);
+
+	printf("%c label%c\n", '\xB3', '\xB3');
+
+	c = { position.X, position.Y + 2 };
+	SetConsoleCursorPosition(h, c);
+
+	printf("%c%c%c%c%c%c%c%c\n", '\xC0', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xD9');
+
+	CONSOLE_CURSOR_INFO cci = { 100, FALSE };
+	SetConsoleCursorInfo(h, &cci);
 }

@@ -3,9 +3,10 @@
 #include <string>
 #include "checkList.h"
 
+
 using namespace std;
 
-HANDLE hStdin;
+HANDLE hStd;
 DWORD fdwSaveOldMode;
 
 
@@ -18,46 +19,28 @@ int main() {
 	int newLineY = startLine;
 	int clicked = 0;
 
-	vector<string> myList = { "[ ]hello", "[ ] hi", "[ ]love" };
-	//myList.insert("[]hello", 0);
-	CheckList checklist(myList);
+	CheckList* checklist = new CheckList();
+
 
 	COORD c;
 	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	DWORD wAttr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-	SetConsoleTextAttribute(h, wAttr);
-
-	for (int i = 0; i < checklist.GetList().size(); i++)
-	{
-		c = { startLine, newLineY++ };
-		SetConsoleCursorPosition(h, c);
-		cout << checklist.GetList()[i] << endl;
-	}
-
-
-	CONSOLE_CURSOR_INFO cci = { 10, TRUE };
-	SetConsoleCursorInfo(h, &cci);
-
-	c = { startLine + 1, startLine };
-	SetConsoleCursorPosition(h, c);
-
 	// Get the standard input handle. 
 
-	hStdin = GetStdHandle(STD_INPUT_HANDLE);
-	if (hStdin == INVALID_HANDLE_VALUE)
-		checklist.ErrorExit("GetStdHandle", hStdin, fdwSaveOldMode);
+	hStd = GetStdHandle(STD_INPUT_HANDLE);
+	if (hStd == INVALID_HANDLE_VALUE)
+		checklist->ErrorExit("GetStdHandle", hStd, fdwSaveOldMode);
 
 	// Save the current input mode, to be restored on exit. 
 
-	if (!GetConsoleMode(hStdin, &fdwSaveOldMode))
-		checklist.ErrorExit("GetConsoleMode", hStdin, fdwSaveOldMode);
+	if (!GetConsoleMode(hStd, &fdwSaveOldMode))
+		checklist->ErrorExit("GetConsoleMode", hStd, fdwSaveOldMode);
 
 	// Enable the window and mouse input events. 
 
 	fdwMode = ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT;
-	if (!SetConsoleMode(hStdin, fdwMode))
-		checklist.ErrorExit("SetConsoleMode", hStdin, fdwSaveOldMode);
+	if (!SetConsoleMode(hStd, fdwMode))
+		checklist->ErrorExit("SetConsoleMode", hStd, fdwSaveOldMode);
 
 
 
@@ -66,11 +49,11 @@ int main() {
 		// Wait for the events. 
 
 		if (!ReadConsoleInput(
-			hStdin,      // input buffer handle 
+			hStd,      // input buffer handle 
 			irInBuf,     // buffer to read into 
 			128,         // size of read buffer 
 			&cNumRead)) // number of records read 
-			checklist.ErrorExit("ReadConsoleInput", hStdin, fdwSaveOldMode);
+			checklist->ErrorExit("ReadConsoleInput", hStd, fdwSaveOldMode);
 
 		// Dispatch the events to the appropriate handler. 
 
@@ -80,15 +63,15 @@ int main() {
 			switch (irInBuf[i].EventType)
 			{
 			case KEY_EVENT: // keyboard input 
-				checklist.KeyEventProc(irInBuf[i].Event.KeyEvent, h, startLine, &checklist);
+				checklist->KeyEventProc(irInBuf[i].Event.KeyEvent, h, startLine, checklist);
 				break;
 
 			case MOUSE_EVENT: // mouse input 
-				checklist.MouseEventProc(irInBuf[i].Event.MouseEvent, h, startLine, &checklist);
+				checklist->MouseEventProc(irInBuf[i].Event.MouseEvent, h, startLine, checklist);
 				break;
 
 			case WINDOW_BUFFER_SIZE_EVENT: // scrn buf. resizing 
-				checklist.ResizeEventProc(irInBuf[i].Event.WindowBufferSizeEvent);
+				checklist->ResizeEventProc(irInBuf[i].Event.WindowBufferSizeEvent);
 				break;
 
 			case FOCUS_EVENT:  // disregard focus events 
@@ -97,7 +80,7 @@ int main() {
 				break;
 
 			default:
-				checklist.ErrorExit("Unknown event type", hStdin, fdwSaveOldMode);
+				checklist->ErrorExit("Unknown event type", hStd, fdwSaveOldMode);
 				break;
 			}
 		}
@@ -105,7 +88,7 @@ int main() {
 
 	// Restore input mode on exit.
 
-	SetConsoleMode(hStdin, fdwSaveOldMode);
+	SetConsoleMode(hStd, fdwSaveOldMode);
 
 
 

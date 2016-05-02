@@ -4,21 +4,22 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "iControl.h"
 
 using namespace std;
 
-class RadioList {
+class RadioList :public iControl
+{
 
 private:
 	vector<string> list;
 	vector<string> choice;
 public:
-	RadioList(vector<string>&);
+	RadioList();
 	~RadioList();
-	VOID ErrorExit(LPSTR, HANDLE, DWORD);
-	VOID KeyEventProc(KEY_EVENT_RECORD, HANDLE, INT, RadioList*);
-	VOID MouseEventProc(MOUSE_EVENT_RECORD, HANDLE, INT, RadioList*);
-	VOID ResizeEventProc(WINDOW_BUFFER_SIZE_RECORD);
+	virtual void draw();
+	virtual VOID KeyEventProc(KEY_EVENT_RECORD, HANDLE, INT, iControl*);
+	virtual VOID MouseEventProc(MOUSE_EVENT_RECORD, HANDLE, INT, iControl*);
 	void SetList(vector<string>);
 	vector<string> GetList();
 	void SetChoice(string);
@@ -27,4 +28,4 @@ public:
 };
 
 
-#endif#pragma once
+#endif

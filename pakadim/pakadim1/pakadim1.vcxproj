@@ -19,10 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{EFB43629-2E56-411F-978D-79CBE4001304}</ProjectGuid>
+    <ProjectGuid>{481081B3-4F54-4181-93E5-D6FC73127103}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>textbox</RootNamespace>
+    <RootNamespace>pakadim1</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>iControl</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -142,13 +143,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="iControl..cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="TextBox.cpp" />
+    <ClInclude Include="iControl.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="iControl.h" />
-    <ClInclude Include="TextBox.h" />
+    <ClCompile Include="iControl.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

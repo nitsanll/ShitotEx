@@ -1,31 +1,57 @@
 #include "TextBox.h"
 
-TextBox::TextBox()
+TextBox::TextBox():iControl({ 7,7 }, { 100,100 })
 {
-
-}
-TextBox::~TextBox()
-{
-
-}
-VOID TextBox::ErrorExit(LPSTR lpszMessage, HANDLE hStdin, DWORD fdwSaveOldMode)
-{
-	fprintf(stderr, "%s\n", lpszMessage);
-
-	// Restore input mode on exit.
-
-	SetConsoleMode(hStdin, fdwSaveOldMode);
-
-	ExitProcess(0);
+	draw();
 }
 
-VOID TextBox::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, TextBox* t)
+void TextBox::draw()
+{
+	short maxCoord = 14;
+
+	COORD c = position;
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleCursorPosition(h, c);
+
+	WORD wAttr = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+	SetConsoleTextAttribute(h, wAttr);
+
+	CONSOLE_SCREEN_BUFFER_INFO cbi;
+	GetConsoleScreenBufferInfo(h, &cbi);
+	WORD wAttr2 = cbi.wAttributes | BACKGROUND_RED;
+	SetConsoleTextAttribute(h, wAttr2);
+
+	printf("%c%c%c%c%c%c%c%c\n", '\xDA', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xBF');
+
+	c = { position.X, position.Y + 1 };
+	SetConsoleCursorPosition(h, c);
+
+	printf("%c\n", '\xB3');
+
+	c = { maxCoord, position.Y + 1 };
+	SetConsoleCursorPosition(h, c);
+
+	printf("%c\n", '\xB3');
+
+	c = { position.X, position.Y + 2 };
+	SetConsoleCursorPosition(h, c);
+
+	printf("%c%c%c%c%c%c%c%c\n", '\xC0', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xD9');
+
+	CONSOLE_CURSOR_INFO cci = { 10, TRUE };
+	SetConsoleCursorInfo(h, &cci);
+
+	c = { position.X + 1, position.Y + 1 };
+	SetConsoleCursorPosition(h, c);
+}
+
+VOID TextBox::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput,INT x)
 {
 	CONSOLE_SCREEN_BUFFER_INFO cbsi;
 	COORD newCoord;
 	GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi);
-	int newLine = 8;
-	int maxBox = 14;
+	short newLine = 8;
+	short maxBox = 14;
 
 	if (cbsi.dwCursorPosition.Y == newLine && cbsi.dwCursorPosition.X == maxBox)
 	{
@@ -115,7 +141,7 @@ VOID TextBox::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, TextBox*
 		break;
 		default:
 		{
-			string checkLength = t->GetstringInput();
+			string checkLength = GetstringInput();
 
 
 			if (ker.bKeyDown)
@@ -126,15 +152,15 @@ VOID TextBox::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, TextBox*
 
 				if (ker.wVirtualKeyCode == VK_BACK)
 				{
-					string str = t->GetstringInput();
-					t->EraseBackSpace(str, cbsi.dwCursorPosition.X - newLine);
+					string str = GetstringInput();
+					EraseBackSpace(str, cbsi.dwCursorPosition.X - newLine);
 					wasEraseBackSpace = 1;
 				}
 
 				else if (ker.wVirtualKeyCode == VK_DELETE)
 				{
-					string str = t->GetstringInput();
-					t->EraseDel(str, cbsi.dwCursorPosition.X - newLine);
+					string str = GetstringInput();
+					EraseDel(str, cbsi.dwCursorPosition.X - newLine);
 					wasEraseDel = 1;
 				}
 
@@ -142,7 +168,7 @@ VOID TextBox::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, TextBox*
 				{
 					if (ker.wVirtualKeyCode >= 0x30 && ker.wVirtualKeyCode <= 0x5A && cbsi.dwCursorPosition.Y == newLine && cbsi.dwCursorPosition.X < maxBox)
 					{
-						t->SetstringInput(ker.uChar.AsciiChar, cbsi.dwCursorPosition.X - newLine);
+						SetstringInput(ker.uChar.AsciiChar, cbsi.dwCursorPosition.X - newLine);
 						okValue = 1;
 					}
 
@@ -156,7 +182,7 @@ VOID TextBox::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, TextBox*
 				if (wasEraseDel == 1 || wasEraseBackSpace == 1)
 					cout << "      ";
 				SetConsoleCursorPosition(hConsoleOutput, newCoord);
-				string temp = t->GetstringInput();
+				string temp = GetstringInput();
 				cout << temp;
 
 				if (wasEraseDel == 1)
@@ -181,12 +207,11 @@ VOID TextBox::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, TextBox*
 	}
 }
 
-VOID TextBox::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hConsoleOutput)
+VOID TextBox::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hConsoleOutput, INT x)
 {
 #ifndef MOUSE_HWHEELED
 #define MOUSE_HWHEELED 0x0008
 #endif
-
 	int start = 8;
 	int max = 14;
 
@@ -219,11 +244,6 @@ VOID TextBox::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hConsoleOutput)
 	}
 }
 
-VOID TextBox::ResizeEventProc(WINDOW_BUFFER_SIZE_RECORD wbsr)
-{
-	printf("Resize event\n");
-	printf("Console screen buffer is %d columns by %d rows.\n", wbsr.dwSize.X, wbsr.dwSize.Y);
-}
 VOID TextBox::SetstringInput(char input, int position)
 {
 	string temp(1, input);

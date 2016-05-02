@@ -2,25 +2,39 @@
 
 using namespace std;
 
-CheckList::CheckList(vector<string>& newlist)
+CheckList::CheckList() : iControl({ 7, 7 }, { 100, 100 })
 {
-	choice = *(new vector<string>);
-
-	list = *(new vector<string>);
-	list = newlist;
+	draw();
 }
-VOID CheckList::ErrorExit(LPSTR lpszMessage, HANDLE hStdin, DWORD fdwSaveOldMode)
+void CheckList::draw(void)
 {
-	fprintf(stderr, "%s\n", lpszMessage);
+	vector<string> myList = { "[ ]hello", "[ ] hi", "[ ]love" };
+	list = myList;
 
-	// Restore input mode on exit.
+	int startLine = 7;
+	int newLineY = startLine;
 
-	SetConsoleMode(hStdin, fdwSaveOldMode);
+	COORD c;
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	ExitProcess(0);
+	DWORD wAttr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+	SetConsoleTextAttribute(h, wAttr);
+
+	for (int i = 0; i < myList.size(); i++)
+	{
+		c = { startLine, newLineY++ };
+		SetConsoleCursorPosition(h, c);
+		cout << myList[i] << endl;
+	}
+
+
+	CONSOLE_CURSOR_INFO cci = { 10, TRUE };
+	SetConsoleCursorInfo(h, &cci);
+
+	c = { startLine + 1, startLine };
+	SetConsoleCursorPosition(h, c);
 }
-
-VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int line, CheckList* checklist)
+VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int line, iControl* checklist)
 {
 
 	COORD newCoord;
@@ -28,17 +42,19 @@ VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 	GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi);
 
 
+	checklist = new CheckList;
+
 
 	int newLineY = line;
-	for (int i = 0; i < checklist->list.size(); i++)
+	for (int i = 0; i < list.size(); i++)
 	{
 		int wasChoosen = 0;
 		newCoord = { line, newLineY };
 		SetConsoleCursorPosition(hConsoleOutput, newCoord);
 
-		for (int j = 0; j < checklist->choice.size(); j++)
+		for (int j = 0; j < choice.size(); j++)
 		{
-			if (checklist->list[i] == checklist->choice[j])
+			if (list[i] == choice[j])
 				wasChoosen = 1;
 		}
 
@@ -50,7 +66,7 @@ VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 			DWORD wAttr2 = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 			SetConsoleTextAttribute(hConsoleOutput, wAttr2);
 
-			cout << checklist->list[i];
+			cout << list[i];
 			newCoord = { line + 1, newLineY };
 			SetConsoleCursorPosition(hConsoleOutput, newCoord);
 			cout << "x";
@@ -68,7 +84,7 @@ VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 			SetConsoleTextAttribute(hConsoleOutput, wAttr);
 			DWORD wAttr2 = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 			SetConsoleTextAttribute(hConsoleOutput, wAttr2);
-			cout << checklist->list[i];
+			cout << list[i];
 
 			wAttr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
 			SetConsoleTextAttribute(hConsoleOutput, wAttr);
@@ -81,7 +97,7 @@ VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 		{
 			newCoord = { line, newLineY };
 			SetConsoleCursorPosition(hConsoleOutput, newCoord);
-			cout << checklist->list[i];
+			cout << list[i];
 			newLineY++;
 		}
 
@@ -104,6 +120,12 @@ VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 				newCoord = { cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y - 1 };
 				SetConsoleCursorPosition(hConsoleOutput, newCoord);
 			}
+			else if (cbsi.dwCursorPosition.Y == line)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, line + 2 };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
 		}
 		break;
 		case VK_NUMPAD8:
@@ -113,14 +135,26 @@ VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 				newCoord = { cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y - 1 };
 				SetConsoleCursorPosition(hConsoleOutput, newCoord);
 			}
+			else if (cbsi.dwCursorPosition.Y == line)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, line + 2 };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
 		}
 		break;
 		case VK_DOWN:
 		{
 			int num;
-			if (cbsi.dwCursorPosition.Y < line + checklist->list.size() - 1)
+			if (cbsi.dwCursorPosition.Y < line + list.size() - 1)
 			{
 				newCoord = { cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y + 1 };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
+			else if (cbsi.dwCursorPosition.Y == line + list.size() - 1)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, line };
 				SetConsoleCursorPosition(hConsoleOutput, newCoord);
 
 			}
@@ -128,13 +162,63 @@ VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 		break;
 		case VK_NUMPAD2:
 		{
-			if (cbsi.dwCursorPosition.Y < line + checklist->list.size() - 1)
+			if (cbsi.dwCursorPosition.Y < line + list.size() - 1)
 			{
 				newCoord = { cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y + 1 };
 				SetConsoleCursorPosition(hConsoleOutput, newCoord);
 			}
+			else if (cbsi.dwCursorPosition.Y == line + list.size() - 1)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, line };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
 		}
 		break;
+		case VK_TAB:
+		{
+			int num;
+			if (cbsi.dwCursorPosition.Y < line + list.size() - 1)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y + 1 };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
+			else if (cbsi.dwCursorPosition.Y == line + list.size() - 1)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, line };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
+			break;
+		}
+		case VK_RETURN:
+		{
+
+			COORD newCoord;
+			int newLineY = line;
+			int found = 0;
+
+			for (int i = 0, j = line; i < list.size(); i++, j++)
+			{
+				if (cbsi.dwCursorPosition.Y == j && cbsi.dwCursorPosition.X >= line && cbsi.dwCursorPosition.X <= line + 2)
+				{
+					for (int k = 0; k < choice.size(); k++)
+					{
+						if (choice[k] == list[i])
+						{
+							eraseChoice(k);
+							found = 1;
+						}
+					}
+					if (found == 0)
+						SetChoice(list[i]);
+
+				}
+			}
+
+			break;
+		}
 		default:
 			break;
 		}
@@ -144,13 +228,16 @@ VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 
 }
 
-VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, CheckList* checklist)
+VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, iControl* checklist)
 {
 #ifndef MOUSE_HWHEELED
 #define MOUSE_HWHEELED 0x0008
 #endif
 	//printf("Mouse event: ");
 	int start = 7;
+
+	checklist = new CheckList;
+
 	if (mer.dwButtonState)
 	{
 		switch (mer.dwEventFlags)
@@ -167,20 +254,20 @@ VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 				int newLineY = line;
 				int found = 0;
 
-				for (int i = 0, j = line; i < checklist->list.size(); i++, j++)
+				for (int i = 0, j = line; i < list.size(); i++, j++)
 				{
 					if (mer.dwMousePosition.Y == j && mer.dwMousePosition.X >= start && mer.dwMousePosition.X <= start + 2)
 					{
-						for (int k = 0; k < checklist->choice.size(); k++)
+						for (int k = 0; k < choice.size(); k++)
 						{
-							if (checklist->choice[k] == checklist->list[i])
+							if (choice[k] == list[i])
 							{
-								checklist->eraseChoice(k);
+								eraseChoice(k);
 								found = 1;
 							}
 						}
 						if (found == 0)
-							checklist->SetChoice(checklist->list[i]);
+							SetChoice(list[i]);
 
 					}
 				}
@@ -195,20 +282,20 @@ VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 				int newLineY = line;
 				int found = 0;
 
-				for (int i = 0, j = line; i < checklist->list.size(); i++, j++)
+				for (int i = 0, j = line; i < list.size(); i++, j++)
 				{
 					if (mer.dwMousePosition.Y == j && mer.dwMousePosition.X >= start && mer.dwMousePosition.X <= start + 2)
 					{
-						for (int k = 0; k < checklist->choice.size(); k++)
+						for (int k = 0; k < choice.size(); k++)
 						{
-							if (checklist->choice[k] == checklist->list[i])
+							if (choice[k] == list[i])
 							{
-								checklist->eraseChoice(k);
+								eraseChoice(k);
 								found = 1;
 							}
 						}
 						if (found == 0)
-							checklist->SetChoice(checklist->list[i]);
+							SetChoice(list[i]);
 					}
 				}
 			}
@@ -232,7 +319,7 @@ VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 
 	//	int rem = mer.dwMousePosition.Y;
 
-	for (int i = 0; i < checklist->list.size(); i++)
+	for (int i = 0; i < list.size(); i++)
 	{
 		int found = 0;
 		newCoord = { line, newLineY };
@@ -241,9 +328,9 @@ VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 
 		if (mer.dwMousePosition.Y == newLineY)
 		{
-			for (int j = 0; j < checklist->choice.size(); j++)
+			for (int j = 0; j < choice.size(); j++)
 			{
-				if (checklist->list[i] == checklist->choice[j])
+				if (list[i] == choice[j])
 				{
 					found = 1;
 				}
@@ -254,7 +341,7 @@ VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 				SetConsoleTextAttribute(hStdin, wAttr);
 				DWORD wAttr2 = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 				SetConsoleTextAttribute(hStdin, wAttr2);
-				cout << checklist->list[i];
+				cout << list[i];
 
 				wAttr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
 				SetConsoleTextAttribute(hStdin, wAttr);
@@ -267,9 +354,9 @@ VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 		{
 			newCoord = { line, newLineY };
 			SetConsoleCursorPosition(hStdin, newCoord);
-			for (int j = 0; j < checklist->choice.size(); j++)
+			for (int j = 0; j < choice.size(); j++)
 			{
-				if (checklist->list[i] == checklist->choice[j])
+				if (list[i] == choice[j])
 				{
 					found = 1;
 				}
@@ -277,7 +364,7 @@ VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 			}
 			if (found != 1)
 			{
-				cout << checklist->list[i];
+				cout << list[i];
 				newLineY++;
 			}
 		}
@@ -290,7 +377,7 @@ VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 			DWORD wAttr2 = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 			SetConsoleTextAttribute(hStdin, wAttr2);
 			SetConsoleCursorPosition(hStdin, newCoord);
-			cout << checklist->list[i];
+			cout << list[i];
 			newCoord = { line + 1, newLineY };
 			SetConsoleCursorPosition(hStdin, newCoord);
 			cout << "x";
@@ -307,17 +394,9 @@ VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 	}
 
 }
-
-
-VOID CheckList::ResizeEventProc(WINDOW_BUFFER_SIZE_RECORD wbsr)
-{
-	printf("Resize event\n");
-	printf("Console screen buffer is %d columns by %d rows.\n", wbsr.dwSize.X, wbsr.dwSize.Y);
-}
 CheckList::~CheckList()
 {
-	list.clear();
-	choice.clear();
+
 }
 
 void CheckList::SetList(vector<string> newlist)

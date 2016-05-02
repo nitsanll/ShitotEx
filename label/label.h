@@ -3,19 +3,21 @@
 #include <windows.h>
 #include <string>
 #include <iostream>
+#include "iControl.h"
 
-class Label
+class Label : public iControl
 {
 
 private:
 	char* input;
 public:
 	Label(char*);
-	~Label();
-	VOID ErrorExit(LPSTR, HANDLE, DWORD);
-	VOID ResizeEventProc(WINDOW_BUFFER_SIZE_RECORD);
-	VOID SetLabel(char*);
+	~Label() {};
+	void KeyEventProc(KEY_EVENT_RECORD, HANDLE, INT) {};
+	void MouseEventProc(MOUSE_EVENT_RECORD, HANDLE, INT) {};
+	void SetLabel(char*);
 	char* GetLabel(void);
+	void draw();
 };
 
 

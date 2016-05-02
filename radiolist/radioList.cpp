@@ -2,43 +2,62 @@
 
 using namespace std;
 
-RadioList::RadioList(vector<string>& newlist)
+RadioList::RadioList() : iControl({ 7, 7 }, { 100, 100 })
 {
-	choice = *(new vector<string>);
+	draw();
 
-	list = *(new vector<string>);
-	list = newlist;
 }
-VOID RadioList::ErrorExit(LPSTR lpszMessage, HANDLE hStdin, DWORD fdwSaveOldMode)
+void RadioList::draw()
 {
-	fprintf(stderr, "%s\n", lpszMessage);
+	DWORD cNumRead, fdwMode, i;
+	INPUT_RECORD irInBuf[128];
+	int counter = 0;
+	int startLine = 7;
+	int newLineY = startLine;
+	int clicked = 0;
 
-	// Restore input mode on exit.
+	vector<string> myList = { "[ ]hello", "[ ] hi", "[ ]love" };
 
-	SetConsoleMode(hStdin, fdwSaveOldMode);
+	list = myList;
 
-	ExitProcess(0);
+	COORD c;
+	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	DWORD wAttr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+	SetConsoleTextAttribute(h, wAttr);
+
+	for (int i = 0; i < myList.size(); i++)
+	{
+		c = { startLine, newLineY++ };
+		SetConsoleCursorPosition(h, c);
+		cout << myList[i] << endl;
+	}
+
+	CONSOLE_CURSOR_INFO cci = { 10, TRUE };
+	SetConsoleCursorInfo(h, &cci);
+
+	c = { startLine + 1, startLine };
+	SetConsoleCursorPosition(h, c);
 }
-
-VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int line, RadioList* RadioList)
+VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int line, iControl* radioList)
 {
 
 	COORD newCoord;
 	CONSOLE_SCREEN_BUFFER_INFO cbsi;
 	GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi);
 
-
+	radioList = new RadioList;
 
 	int newLineY = line;
-	for (int i = 0; i < RadioList->list.size(); i++)
+	for (int i = 0; i < list.size(); i++)
 	{
 		int wasChoosen = 0;
 		newCoord = { line, newLineY };
 		SetConsoleCursorPosition(hConsoleOutput, newCoord);
 
-		for (int j = 0; j < RadioList->choice.size(); j++)
+		for (int j = 0; j < choice.size(); j++)
 		{
-			if (RadioList->list[i] == RadioList->choice[j])
+			if (list[i] == choice[j])
 				wasChoosen = 1;
 		}
 
@@ -50,7 +69,7 @@ VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 			DWORD wAttr2 = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 			SetConsoleTextAttribute(hConsoleOutput, wAttr2);
 
-			cout << RadioList->list[i];
+			cout << list[i];
 			newCoord = { line + 1, newLineY };
 			SetConsoleCursorPosition(hConsoleOutput, newCoord);
 			cout << "x";
@@ -68,7 +87,7 @@ VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 			SetConsoleTextAttribute(hConsoleOutput, wAttr);
 			DWORD wAttr2 = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 			SetConsoleTextAttribute(hConsoleOutput, wAttr2);
-			cout << RadioList->list[i];
+			cout << list[i];
 
 			wAttr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
 			SetConsoleTextAttribute(hConsoleOutput, wAttr);
@@ -81,7 +100,7 @@ VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 		{
 			newCoord = { line, newLineY };
 			SetConsoleCursorPosition(hConsoleOutput, newCoord);
-			cout << RadioList->list[i];
+			cout << list[i];
 			newLineY++;
 		}
 
@@ -104,6 +123,12 @@ VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 				newCoord = { cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y - 1 };
 				SetConsoleCursorPosition(hConsoleOutput, newCoord);
 			}
+			else if (cbsi.dwCursorPosition.Y == line)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, line + 2 };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
 		}
 		break;
 		case VK_NUMPAD8:
@@ -113,14 +138,26 @@ VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 				newCoord = { cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y - 1 };
 				SetConsoleCursorPosition(hConsoleOutput, newCoord);
 			}
+			else if (cbsi.dwCursorPosition.Y == line)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, line + 2 };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
 		}
 		break;
 		case VK_DOWN:
 		{
 			int num;
-			if (cbsi.dwCursorPosition.Y < line + RadioList->list.size() - 1)
+			if (cbsi.dwCursorPosition.Y < line + list.size() - 1)
 			{
 				newCoord = { cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y + 1 };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
+			else if (cbsi.dwCursorPosition.Y == line + list.size() - 1)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, line };
 				SetConsoleCursorPosition(hConsoleOutput, newCoord);
 
 			}
@@ -128,13 +165,63 @@ VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 		break;
 		case VK_NUMPAD2:
 		{
-			if (cbsi.dwCursorPosition.Y < line + RadioList->list.size() - 1)
+			if (cbsi.dwCursorPosition.Y < line + list.size() - 1)
 			{
 				newCoord = { cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y + 1 };
 				SetConsoleCursorPosition(hConsoleOutput, newCoord);
 			}
+			else if (cbsi.dwCursorPosition.Y == line + list.size() - 1)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, line };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
 		}
 		break;
+		case VK_TAB:
+		{
+			int num;
+			if (cbsi.dwCursorPosition.Y < line + list.size() - 1)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, cbsi.dwCursorPosition.Y + 1 };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
+			else if (cbsi.dwCursorPosition.Y == line + list.size() - 1)
+			{
+				newCoord = { cbsi.dwCursorPosition.X, line };
+				SetConsoleCursorPosition(hConsoleOutput, newCoord);
+
+			}
+			break;
+		}
+		case VK_RETURN:
+		{
+
+			COORD newCoord;
+			int newLineY = line;
+			int found = 0;
+
+			for (int i = 0, j = line; i < list.size(); i++, j++)
+			{
+				if (cbsi.dwCursorPosition.Y == j && cbsi.dwCursorPosition.X >= line && cbsi.dwCursorPosition.X <= line + 2)
+				{
+					for (int k = 0; k < choice.size(); k++)
+					{
+						if (choice[k] == list[i])
+						{
+							eraseChoice(k);
+							found = 1;
+						}
+					}
+					if (found == 0 && choice.size()<1)
+						SetChoice(list[i]);
+
+				}
+			}
+
+			break;
+		}
 		default:
 			break;
 		}
@@ -143,14 +230,14 @@ VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 
 
 }
-
-VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, RadioList* RadioList)
+VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, iControl* radioList)
 {
 #ifndef MOUSE_HWHEELED
 #define MOUSE_HWHEELED 0x0008
 #endif
 	//printf("Mouse event: ");
 	int start = 7;
+	radioList = new RadioList;
 	if (mer.dwButtonState)
 	{
 		switch (mer.dwEventFlags)
@@ -167,20 +254,20 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 				int newLineY = line;
 				int found = 0;
 
-				for (int i = 0, j = line; i < RadioList->list.size(); i++, j++)
+				for (int i = 0, j = line; i < list.size(); i++, j++)
 				{
 					if (mer.dwMousePosition.Y == j && mer.dwMousePosition.X >= start && mer.dwMousePosition.X <= start + 2)
 					{
-						for (int k = 0; k < RadioList->choice.size(); k++)
+						for (int k = 0; k < choice.size(); k++)
 						{
-							if (RadioList->choice[k] == RadioList->list[i])
+							if (choice[k] == list[i])
 							{
-								RadioList->eraseChoice(k);
+								eraseChoice(k);
 								found = 1;
 							}
 						}
-						if (found == 0 && RadioList->choice.size()<1)
-							RadioList->SetChoice(RadioList->list[i]);
+						if (found == 0 && choice.size()<1)
+							SetChoice(list[i]);
 
 					}
 				}
@@ -195,20 +282,20 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 				int newLineY = line;
 				int found = 0;
 
-				for (int i = 0, j = line; i < RadioList->list.size(); i++, j++)
+				for (int i = 0, j = line; i < list.size(); i++, j++)
 				{
 					if (mer.dwMousePosition.Y == j && mer.dwMousePosition.X >= start && mer.dwMousePosition.X <= start + 2)
 					{
-						for (int k = 0; k < RadioList->choice.size(); k++)
+						for (int k = 0; k < choice.size(); k++)
 						{
-							if (RadioList->choice[k] == RadioList->list[i])
+							if (choice[k] == list[i])
 							{
-								RadioList->eraseChoice(k);
+								eraseChoice(k);
 								found = 1;
 							}
 						}
-						if (found == 0 && RadioList->choice.size() <1)
-							RadioList->SetChoice(RadioList->list[i]);
+						if (found == 0 && choice.size() <1)
+							SetChoice(list[i]);
 					}
 				}
 			}
@@ -230,9 +317,8 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 	CONSOLE_SCREEN_BUFFER_INFO cbsi;
 	GetConsoleScreenBufferInfo(hStdin, &cbsi);
 
-	//	int rem = mer.dwMousePosition.Y;
 
-	for (int i = 0; i < RadioList->list.size(); i++)
+	for (int i = 0; i < list.size(); i++)
 	{
 		int found = 0;
 		newCoord = { line, newLineY };
@@ -241,9 +327,9 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 
 		if (mer.dwMousePosition.Y == newLineY)
 		{
-			for (int j = 0; j < RadioList->choice.size(); j++)
+			for (int j = 0; j < choice.size(); j++)
 			{
-				if (RadioList->list[i] == RadioList->choice[j])
+				if (list[i] == choice[j])
 				{
 					found = 1;
 				}
@@ -254,7 +340,7 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 				SetConsoleTextAttribute(hStdin, wAttr);
 				DWORD wAttr2 = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 				SetConsoleTextAttribute(hStdin, wAttr2);
-				cout << RadioList->list[i];
+				cout << list[i];
 
 				wAttr = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
 				SetConsoleTextAttribute(hStdin, wAttr);
@@ -267,9 +353,9 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 		{
 			newCoord = { line, newLineY };
 			SetConsoleCursorPosition(hStdin, newCoord);
-			for (int j = 0; j < RadioList->choice.size(); j++)
+			for (int j = 0; j < choice.size(); j++)
 			{
-				if (RadioList->list[i] == RadioList->choice[j])
+				if (list[i] == choice[j])
 				{
 					found = 1;
 				}
@@ -277,7 +363,7 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 			}
 			if (found != 1)
 			{
-				cout << RadioList->list[i];
+				cout << list[i];
 				newLineY++;
 			}
 		}
@@ -290,7 +376,7 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 			DWORD wAttr2 = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
 			SetConsoleTextAttribute(hStdin, wAttr2);
 			SetConsoleCursorPosition(hStdin, newCoord);
-			cout << RadioList->list[i];
+			cout << list[i];
 			newCoord = { line + 1, newLineY };
 			SetConsoleCursorPosition(hStdin, newCoord);
 			cout << "x";
@@ -307,19 +393,9 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 	}
 
 }
-
-
-VOID RadioList::ResizeEventProc(WINDOW_BUFFER_SIZE_RECORD wbsr)
-{
-	printf("Resize event\n");
-	printf("Console screen buffer is %d columns by %d rows.\n", wbsr.dwSize.X, wbsr.dwSize.Y);
-}
 RadioList::~RadioList()
 {
-	list.clear();
-	choice.clear();
 }
-
 void RadioList::SetList(vector<string> newlist)
 {
 	list = newlist;

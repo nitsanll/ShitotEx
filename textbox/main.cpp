@@ -13,45 +13,13 @@ int main(VOID)
 	DWORD cNumRead, fdwMode, i;
 	INPUT_RECORD irInBuf[128];
 	int counter = 0;
-	TextBox textbox;
-	int startCoord = 7;
-	int maxCoord = 14;
+	short startCoord = 7;
+	short maxCoord = 14;
 
+	TextBox textbox;
+	iControl* control = &textbox;
 	COORD c = { startCoord, startCoord };
 	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleCursorPosition(h, c);
-
-	DWORD wAttr = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-	SetConsoleTextAttribute(h, wAttr);
-
-	CONSOLE_SCREEN_BUFFER_INFO cbi;
-	GetConsoleScreenBufferInfo(h, &cbi);
-	DWORD wAttr2 = cbi.wAttributes | BACKGROUND_RED;
-	SetConsoleTextAttribute(h, wAttr2);
-
-	printf("%c%c%c%c%c%c%c%c\n", '\xDA', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xBF');
-
-	c = { startCoord, startCoord + 1 };
-	SetConsoleCursorPosition(h, c);
-
-	printf("%c\n", '\xB3');
-
-
-	c = { maxCoord, startCoord + 1 };
-	SetConsoleCursorPosition(h, c);
-
-	printf("%c\n", '\xB3');
-
-	c = { startCoord, startCoord + 2 };
-	SetConsoleCursorPosition(h, c);
-
-	printf("%c%c%c%c%c%c%c%c\n", '\xC0', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xC4', '\xD9');
-
-	CONSOLE_CURSOR_INFO cci = { 10, TRUE };
-	SetConsoleCursorInfo(h, &cci);
-
-	c = { startCoord + 1, startCoord + 1 };
-	SetConsoleCursorPosition(h, c);
 
 	// Get the standard input handle. 
 
@@ -90,11 +58,11 @@ int main(VOID)
 			switch (irInBuf[i].EventType)
 			{
 			case KEY_EVENT: // keyboard input 
-				textbox.KeyEventProc(irInBuf[i].Event.KeyEvent, h, &textbox);
+				textbox.KeyEventProc(irInBuf[i].Event.KeyEvent, h, startCoord);
 				break;
 
 			case MOUSE_EVENT: // mouse input 
-				textbox.MouseEventProc(irInBuf[i].Event.MouseEvent, h);
+				textbox.MouseEventProc(irInBuf[i].Event.MouseEvent, h, startCoord);
 				break;
 
 			case WINDOW_BUFFER_SIZE_EVENT: // scrn buf. resizing 

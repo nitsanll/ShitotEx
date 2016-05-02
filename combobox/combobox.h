@@ -4,11 +4,12 @@
 #include <string>
 #include <iostream>
 #include <vector>
-
+#include "iControl.h"
 
 using namespace std;
 
-class Combo {
+class Combo : public iControl
+{
 private:
 	vector<string> list;
 	string choice;
@@ -19,7 +20,14 @@ public:
 	~Combo();
 	vector<string> getList();
 	string getDeafult();
-	void setDeafult(string str);
-	};
+	void setDeafult(string);
+	void draw();
+	void MouseEventProc(MOUSE_EVENT_RECORD, HANDLE, int);
+	void KeyEventProc(KEY_EVENT_RECORD, HANDLE, int);
+	void printLines(HANDLE, DWORD, DWORD);
+	void eraseLines(string, int, HANDLE);
+	void changeTextColorDown(int, HANDLE, DWORD, DWORD, DWORD, DWORD);
+	void changeTextColorUp(int, HANDLE, DWORD, DWORD, DWORD, DWORD);
+};
 
 #endif
