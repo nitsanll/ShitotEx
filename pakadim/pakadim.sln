@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "textbox", "..\textbox\textb
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComboBox", "..\ComboBox\ComboBox.vcxproj", "{9444462C-A418-4501-82F0-EE488462DECA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iControl", "pakadim1\pakadim1.vcxproj", "{481081B3-4F54-4181-93E5-D6FC73127103}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iControl", "..\iControl\iControl.vcxproj", "{481081B3-4F54-4181-93E5-D6FC73127103}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
