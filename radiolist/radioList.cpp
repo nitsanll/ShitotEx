@@ -39,14 +39,14 @@ void RadioList::draw()
 	c = { startLine + 1, startLine };
 	SetConsoleCursorPosition(h, c);
 }
-VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int line, iControl* radioList)
+VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int line)
 {
 
 	COORD newCoord;
 	CONSOLE_SCREEN_BUFFER_INFO cbsi;
 	GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi);
 
-	radioList = new RadioList;
+
 
 	int newLineY = line;
 	for (int i = 0; i < list.size(); i++)
@@ -208,14 +208,16 @@ VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 				{
 					for (int k = 0; k < choice.size(); k++)
 					{
-						if (choice[k] == list[i])
+						if (choice[k] != list[i])
 						{
 							eraseChoice(k);
-							found = 1;
+							SetChoice(list[i]);
 						}
 					}
-					if (found == 0 && choice.size()<1)
+					if (choice.size() == 0)
+					{
 						SetChoice(list[i]);
+					}
 
 				}
 			}
@@ -230,14 +232,14 @@ VOID RadioList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 
 
 }
-VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, iControl* radioList)
+VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line)
 {
 #ifndef MOUSE_HWHEELED
 #define MOUSE_HWHEELED 0x0008
 #endif
 	//printf("Mouse event: ");
 	int start = 7;
-	radioList = new RadioList;
+
 	if (mer.dwButtonState)
 	{
 		switch (mer.dwEventFlags)
@@ -260,15 +262,16 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 					{
 						for (int k = 0; k < choice.size(); k++)
 						{
-							if (choice[k] == list[i])
+							if (choice[k] != list[i])
 							{
 								eraseChoice(k);
-								found = 1;
+								SetChoice(list[i]);
 							}
 						}
-						if (found == 0 && choice.size()<1)
+						if (choice.size() == 0)
+						{
 							SetChoice(list[i]);
-
+						}
 					}
 				}
 			}
@@ -288,14 +291,16 @@ VOID RadioList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 					{
 						for (int k = 0; k < choice.size(); k++)
 						{
-							if (choice[k] == list[i])
+							if (choice[k] != list[i])
 							{
 								eraseChoice(k);
-								found = 1;
+								SetChoice(list[i]);
 							}
 						}
-						if (found == 0 && choice.size() <1)
+						if (choice.size() == 0)
+						{
 							SetChoice(list[i]);
+						}
 					}
 				}
 			}

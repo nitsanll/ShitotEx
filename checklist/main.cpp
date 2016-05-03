@@ -19,7 +19,7 @@ int main() {
 	int newLineY = startLine;
 	int clicked = 0;
 
-	CheckList* checklist = new CheckList();
+	CheckList checklist;
 
 
 	COORD c;
@@ -29,18 +29,18 @@ int main() {
 
 	hStd = GetStdHandle(STD_INPUT_HANDLE);
 	if (hStd == INVALID_HANDLE_VALUE)
-		checklist->ErrorExit("GetStdHandle", hStd, fdwSaveOldMode);
+		checklist.ErrorExit("GetStdHandle", hStd, fdwSaveOldMode);
 
 	// Save the current input mode, to be restored on exit. 
 
 	if (!GetConsoleMode(hStd, &fdwSaveOldMode))
-		checklist->ErrorExit("GetConsoleMode", hStd, fdwSaveOldMode);
+		checklist.ErrorExit("GetConsoleMode", hStd, fdwSaveOldMode);
 
 	// Enable the window and mouse input events. 
 
 	fdwMode = ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT;
 	if (!SetConsoleMode(hStd, fdwMode))
-		checklist->ErrorExit("SetConsoleMode", hStd, fdwSaveOldMode);
+		checklist.ErrorExit("SetConsoleMode", hStd, fdwSaveOldMode);
 
 
 
@@ -53,7 +53,7 @@ int main() {
 			irInBuf,     // buffer to read into 
 			128,         // size of read buffer 
 			&cNumRead)) // number of records read 
-			checklist->ErrorExit("ReadConsoleInput", hStd, fdwSaveOldMode);
+			checklist.ErrorExit("ReadConsoleInput", hStd, fdwSaveOldMode);
 
 		// Dispatch the events to the appropriate handler. 
 
@@ -63,15 +63,15 @@ int main() {
 			switch (irInBuf[i].EventType)
 			{
 			case KEY_EVENT: // keyboard input 
-				checklist->KeyEventProc(irInBuf[i].Event.KeyEvent, h, startLine, checklist);
+				checklist.KeyEventProc(irInBuf[i].Event.KeyEvent, h, startLine);
 				break;
 
 			case MOUSE_EVENT: // mouse input 
-				checklist->MouseEventProc(irInBuf[i].Event.MouseEvent, h, startLine, checklist);
+				checklist.MouseEventProc(irInBuf[i].Event.MouseEvent, h, startLine);
 				break;
 
 			case WINDOW_BUFFER_SIZE_EVENT: // scrn buf. resizing 
-				checklist->ResizeEventProc(irInBuf[i].Event.WindowBufferSizeEvent);
+				checklist.ResizeEventProc(irInBuf[i].Event.WindowBufferSizeEvent);
 				break;
 
 			case FOCUS_EVENT:  // disregard focus events 
@@ -80,7 +80,7 @@ int main() {
 				break;
 
 			default:
-				checklist->ErrorExit("Unknown event type", hStd, fdwSaveOldMode);
+				checklist.ErrorExit("Unknown event type", hStd, fdwSaveOldMode);
 				break;
 			}
 		}

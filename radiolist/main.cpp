@@ -60,11 +60,11 @@ int main() {
 			switch (irInBuf[i].EventType)
 			{
 			case KEY_EVENT: // keyboard input 
-				RadioList.KeyEventProc(irInBuf[i].Event.KeyEvent, h, startLine, &RadioList);
+				RadioList.KeyEventProc(irInBuf[i].Event.KeyEvent, h, startLine);
 				break;
 
 			case MOUSE_EVENT: // mouse input 
-				RadioList.MouseEventProc(irInBuf[i].Event.MouseEvent, h, startLine, &RadioList);
+				RadioList.MouseEventProc(irInBuf[i].Event.MouseEvent, h, startLine);
 				break;
 
 			case WINDOW_BUFFER_SIZE_EVENT: // scrn buf. resizing 

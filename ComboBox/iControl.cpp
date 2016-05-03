@@ -4,12 +4,6 @@
 
 using namespace std;
 
-iControl::iControl(COORD p, COORD s)
-{
-	position = p;
-	size = s;
-}
-
 void iControl::ResizeEventProc(WINDOW_BUFFER_SIZE_RECORD wbsr)
 {
 	printf("Resize event\n");

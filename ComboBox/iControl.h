@@ -8,7 +8,7 @@ protected:
 	COORD size;
 	COORD position;
 public:
-	iControl(COORD, COORD);
+	iControl(COORD _size, COORD _position) :position(_position), size(_size) {};
 	~iControl() {};
 	virtual void draw() = 0;
 	virtual void KeyEventProc(KEY_EVENT_RECORD, HANDLE, INT) = 0;

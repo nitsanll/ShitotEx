@@ -1,6 +1,6 @@
 #include "checkList.h"
 
-using namespace std;
+//using namespace std;
 
 CheckList::CheckList() : iControl({ 7, 7 }, { 100, 100 })
 {
@@ -34,15 +34,12 @@ void CheckList::draw(void)
 	c = { startLine + 1, startLine };
 	SetConsoleCursorPosition(h, c);
 }
-VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int line, iControl* checklist)
+VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int line)
 {
 
 	COORD newCoord;
 	CONSOLE_SCREEN_BUFFER_INFO cbsi;
 	GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi);
-
-
-	checklist = new CheckList;
 
 
 	int newLineY = line;
@@ -228,7 +225,7 @@ VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 
 }
 
-VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, iControl* checklist)
+VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line)
 {
 #ifndef MOUSE_HWHEELED
 #define MOUSE_HWHEELED 0x0008
@@ -236,7 +233,6 @@ VOID CheckList::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdin, int line, 
 	//printf("Mouse event: ");
 	int start = 7;
 
-	checklist = new CheckList;
 
 	if (mer.dwButtonState)
 	{

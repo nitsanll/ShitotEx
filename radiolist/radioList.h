@@ -18,13 +18,13 @@ public:
 	RadioList();
 	~RadioList();
 	virtual void draw();
-	virtual VOID KeyEventProc(KEY_EVENT_RECORD, HANDLE, INT, iControl*);
-	virtual VOID MouseEventProc(MOUSE_EVENT_RECORD, HANDLE, INT, iControl*);
+	virtual VOID KeyEventProc(KEY_EVENT_RECORD, HANDLE, int);
+	virtual VOID MouseEventProc(MOUSE_EVENT_RECORD, HANDLE, int);
 	void SetList(vector<string>);
 	vector<string> GetList();
 	void SetChoice(string);
 	vector<string> GetChoice();
-	VOID eraseChoice(INT);
+	VOID eraseChoice(int);
 };
 
 
