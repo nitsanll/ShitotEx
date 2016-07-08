@@ -10,26 +10,26 @@ using namespace std;
 class iControl
 {
 protected:
-	COORD size;
-	COORD position;
-	static iControl *focused;
-	bool visibility;
+	COORD size; //size of the control
+	COORD position; //position of the control
+	static iControl *focused; // static variable for the control that has focus
+	bool visibility; // if the control is visible
 	Color backgroundColor;
 	Color foregroundColor;
 	size_t layer;
 	const BorderDrawer *_borderDrawer;
 
 public:
-	void setBackground(Color newColor) { backgroundColor = newColor; }
+	void setBackground(Color newColor) { backgroundColor = newColor; } //sets the control's background color
 	Color getBackground() { return backgroundColor; }
-	void setForeground(Color newColor) { foregroundColor = newColor; }
+	void setForeground(Color newColor) { foregroundColor = newColor; } //sets the control's foreground color
 	Color getForeground(){ return foregroundColor;}
 	size_t getLayer() { return layer; }
 	virtual void setLayer(size_t newLayer) { layer = newLayer; }
 	bool getVisibility() { return visibility; }
 	void setVisibility(bool v) { visibility = v; }
-	void show() { setVisibility(true); }
-	void hide() { setVisibility(false); }
+	void show() { setVisibility(true); } //show control
+	void hide() { setVisibility(false); } //hide control
 	iControl(COORD, COORD);
 	~iControl() {};
 	virtual void draw(Graphics &g, int left, int top, int layer); //implement diffrent draw to each control

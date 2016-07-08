@@ -15,6 +15,8 @@ void Panel::AddiControl(iControl &icontrol, short left, short top)
 		cout << "cannot add this control to panel! size overflow"; 
 	}
 }
+
+// draw calls to all controls draw
 void Panel::draw(Graphics &g, int left, int top, int layer)
 {
 	if (!visibility)
@@ -23,7 +25,7 @@ void Panel::draw(Graphics &g, int left, int top, int layer)
 	if (layer == getLayer()) {
 		iControl::draw(g, left, top, layer);
 		/*for (int i = 0; i < getWidth(); i++) {
-			/*for (int j = 0; j < getHeight(); j++) {
+			for (int j = 0; j < getHeight(); j++) {
 				g.write(i + left + getCol(),j + top + getLine()," ");
 			}
 		}*/
