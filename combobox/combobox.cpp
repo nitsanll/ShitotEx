@@ -1,10 +1,14 @@
 #include "Combobox.h"
 
-Combo::Combo() :iControl({ 7, 7 }, { 100, 100 })
+Combo::Combo(int width, vector<string> entries) :Panel(width, entries.size()+1)
 {
-	list = { "1990", "1991", "1992" };
+	list = entries;
 	deafult = "   ";
-	draw();
+	Label l(width - 1, deafult);
+	Button b(1);
+	b.SetText("v");
+	label = l;
+	button = b;
 }
 
 vector<string> Combo::getList()
@@ -12,37 +16,50 @@ vector<string> Combo::getList()
 	return list;
 }
 
-string Combo::getDeafult()
+size_t Combo::GetSelectedIndex()
 {
-	return deafult;
+	for (int i = 0; i < list.size(); i++)
+	{
+		if (deafult.compare(list.at(i)) == 0) {
+			return i;
+		}
+	}
 }
-
-void Combo::setDeafult(string str)
-{
-	deafult = str;
+void Combo::SetSelectedIndex(size_t index){
+	deafult = list.at(index);
 }
 
 void Combo::draw()
-{
+{	
+	
 	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD c[] = { { 7, 7 },{ 7,8 },{ 7,9 },{ 7,10 } };
+
 	CONSOLE_SCREEN_BUFFER_INFO cbi;
 	GetConsoleScreenBufferInfo(hStdout, &cbi);
+	
+	c[list.size()+1] = {};
+	COORD tmpPos = position;
+	for (int i = 0; i<=list.size(); i++)
+	{
+		c[i] = tmpPos;
+		tmpPos.Y++;
+	}
 
 	DWORD wAttr1 = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
 	SetConsoleTextAttribute(hStdout, wAttr1);
 
 	SetConsoleCursorPosition(hStdout, c[0]);
-
 	CONSOLE_CURSOR_INFO cci = { 100, FALSE };
 	SetConsoleCursorInfo(hStdout, &cci);
-
-	cout << getDeafult() + " " + 'V' << endl;
+	AddiControl(label, position.X, position.Y);
+	AddiControl(button, position.X + (width - 1), position.Y);
+	controls.at(0)->draw();//label draw
+	controls.at(1)->draw();//button1 draw
 
 	SetConsoleCursorPosition(hStdout, c[0]);
 }
 
-void Combo::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdout, int line)
+void Combo::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdout)
 {
 #ifndef MOUSE_HWHEELED
 #define MOUSE_HWHEELED 0x0008
@@ -53,36 +70,36 @@ void Combo::MouseEventProc(MOUSE_EVENT_RECORD mer, HANDLE hStdout, int line)
 	DWORD wAttr2 = cbi.wAttributes &  ~(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_INTENSITY);
 	DWORD wAttr3 = cbi.wAttributes &  ~(FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	DWORD wAttr4 = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
-	COORD c[] = { { 7, 8 },{ 7,9 },{ 7,10 } };
-	string erase = "          ";
+	string erase = "                                          ";
 	if (mer.dwEventFlags == 0)
 	{
 		if (mer.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
 		{
 			vector<string> str = list;
-			if (mer.dwMousePosition.Y == line && mer.dwMousePosition.X >= 7 && mer.dwMousePosition.X <= 12)
+			if (mer.dwMousePosition.Y == getLine() && mer.dwMousePosition.X >= position.X && mer.dwMousePosition.X <= position.X+size.X)
 			{
 				printLines(hStdout, wAttr1, wAttr2);
 			}
 
 			for (int i = 0, j = 1; i < str.size(); i++, j++) {
-				if (mer.dwMousePosition.Y == line + j && mer.dwMousePosition.X >= 7 && mer.dwMousePosition.X <= 12)
+				if (mer.dwMousePosition.Y == getLine() + j && mer.dwMousePosition.X >= position.X && mer.dwMousePosition.X <= position.X + size.X)
 				{
-					setDeafult(str.at(i));
-					SetConsoleCursorPosition(hStdout, { 7,7 });
+					SetSelectedIndex(i);
+					SetConsoleCursorPosition(hStdout, position);
 					SetConsoleTextAttribute(hStdout, wAttr1);
-					cout << deafult + " " + 'V' << endl;
-					eraseLines(erase, str.size(), hStdout);
-					SetConsoleCursorPosition(hStdout, { 7,7 });
+					label.SetText(deafult);
+					label.draw();
+					SetConsoleCursorPosition(hStdout, c[1]);
+					eraseLines(str.size(), hStdout);
+					SetConsoleCursorPosition(hStdout, position);
 				}
 			}
 		}
 	}
 }
 
-void Combo::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hStdout, int line)
+void Combo::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hStdout)
 {
-	COORD c[] = { { 7, 8 },{ 7,9 },{ 7,10 } };
 	CONSOLE_SCREEN_BUFFER_INFO cbi;
 	GetConsoleScreenBufferInfo(hStdout, &cbi);
 	COORD coord = cbi.dwCursorPosition;
@@ -90,7 +107,7 @@ void Combo::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hStdout, int line)
 	DWORD wAttr2 = cbi.wAttributes &  ~(BACKGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_INTENSITY);
 	DWORD wAttr3 = cbi.wAttributes &  ~(FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	DWORD wAttr4 = BACKGROUND_GREEN | BACKGROUND_INTENSITY;
-	string erase = "          ";
+	string erase = "                   ";
 
 	const WORD up = VK_UP;
 	const WORD down = VK_DOWN;
@@ -100,17 +117,17 @@ void Combo::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hStdout, int line)
 		{
 			GetConsoleScreenBufferInfo(hStdout, &cbi);
 			coord = cbi.dwCursorPosition;
-			if (coord.Y == 10) {
-				changeTextColorUp(2, hStdout, wAttr1, wAttr2, wAttr3, wAttr4);
-			}
-			if (coord.Y == 9) {
-				changeTextColorUp(1, hStdout, wAttr1, wAttr2, wAttr3, wAttr4);
+			for (int i = list.size(); i > 0; i--)
+			{
+				if (coord.Y == c[i].Y) {
+					changeTextColorUp(i-1, hStdout, wAttr1, wAttr2, wAttr3, wAttr4);
+				}
 			}
 		}
 
 		if (ker.wVirtualKeyCode == down)
 		{
-			if (coord.Y == line)
+			if (coord.Y == getLine())
 			{
 				printLines(hStdout, wAttr1, wAttr2);
 				changeTextColorDown(0, hStdout, wAttr1, wAttr2, wAttr3, wAttr4);
@@ -121,9 +138,12 @@ void Combo::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hStdout, int line)
 				GetConsoleScreenBufferInfo(hStdout, &cbi);
 				coord = cbi.dwCursorPosition;
 				printLines(hStdout, wAttr1, wAttr2);
-				if (coord.Y == line + 1) changeTextColorDown(1, hStdout, wAttr1, wAttr2, wAttr3, wAttr4);
-				if (coord.Y == line + 2) changeTextColorDown(2, hStdout, wAttr1, wAttr2, wAttr3, wAttr4);
-				if (coord.Y == line + 3) changeTextColorDown(3, hStdout, wAttr1, wAttr2, wAttr3, wAttr4);
+				for (int i = 1; i <= list.size(); i++)
+				{
+					if (coord.Y == c[i].Y) {
+						changeTextColorDown(i, hStdout, wAttr1, wAttr2, wAttr3, wAttr4);
+					}
+				}
 			}
 		}
 
@@ -132,70 +152,79 @@ void Combo::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hStdout, int line)
 			GetConsoleScreenBufferInfo(hStdout, &cbi);
 			coord = cbi.dwCursorPosition;
 			int i = coord.Y;
-			setDeafult(list.at(i - 8));
-			SetConsoleCursorPosition(hStdout, { 7,7 });
-			SetConsoleTextAttribute(hStdout, wAttr1);
-			cout << deafult + " " + 'V' << endl;
-			eraseLines(erase, list.size(), hStdout);
-			SetConsoleCursorPosition(hStdout, { 7,7 });
+			for (int j = 1; j <= list.size(); j++)
+			{
+				if (i == c[j].Y) {
+					SetSelectedIndex(j - 1);
+					SetConsoleCursorPosition(hStdout, position);
+					SetConsoleTextAttribute(hStdout, wAttr1);
+					label.SetText(deafult);
+					label.draw();
+					SetConsoleCursorPosition(hStdout, c[1]);
+					eraseLines(list.size(), hStdout);
+					SetConsoleCursorPosition(hStdout, position);
+				}
+			}
+
 		}
 	}
 }
 
 void Combo::printLines(HANDLE hStdout, DWORD wAttr1, DWORD wAttr2)
 {
-	COORD c[] = { { 7, 8 },{ 7,9 },{ 7,10 } };
 	CONSOLE_CURSOR_INFO cci = { 100, FALSE };
 	SetConsoleCursorInfo(hStdout, &cci);
 	SetConsoleTextAttribute(hStdout, wAttr1);
 	SetConsoleTextAttribute(hStdout, wAttr2);
 	for (int i = 0; i < list.size(); i++) {
-		SetConsoleCursorPosition(hStdout, c[i]);
+		SetConsoleCursorPosition(hStdout, c[i+1]);
 		cout << list.at(i);
 	}
 }
 
-void Combo::eraseLines(string tmp, int size, HANDLE hStdout)
+void Combo::eraseLines(int size, HANDLE hStdout)
 {
-	COORD c1[] = { { 7,8 },{ 7,9 },{ 7,10 } };
 	CONSOLE_CURSOR_INFO cci = { 100, FALSE };
 	SetConsoleCursorInfo(hStdout, &cci);
-
 	for (int i = 0; i < size; i++) {
-		SetConsoleCursorPosition(hStdout, c1[i]);
-		cout << tmp;
+		SetConsoleCursorPosition(hStdout, c[i+1]);
+		cout << "                         ";
 	}
 }
 
 void Combo::changeTextColorDown(int i, HANDLE hStdout, DWORD wAttr1, DWORD wAttr2, DWORD wAttr3, DWORD wAttr4)
 {
-	COORD c[] = { { 7, 8 },{ 7,9 },{ 7,10 } };
-	if (i == 3) {
-		SetConsoleCursorPosition(hStdout, c[i - 1]);
+	if (i == list.size()) {
 		SetConsoleTextAttribute(hStdout, wAttr3);
 		SetConsoleTextAttribute(hStdout, wAttr4);
-		cout << list.at(i - 1);
+		SetConsoleCursorPosition(hStdout, c[i]);
+		cout << list.at(i-1);
+		SetConsoleTextAttribute(hStdout, wAttr1);
+		SetConsoleTextAttribute(hStdout, wAttr2);
 	}
 	else {
 		SetConsoleTextAttribute(hStdout, wAttr3);
 		SetConsoleTextAttribute(hStdout, wAttr4);
-		SetConsoleCursorPosition(hStdout, c[i]);
+		SetConsoleCursorPosition(hStdout, c[i+1]);
 		cout << list.at(i);
+		SetConsoleTextAttribute(hStdout, wAttr1);
+		SetConsoleTextAttribute(hStdout, wAttr2);
 	}
-	SetConsoleTextAttribute(hStdout, wAttr1);
-	SetConsoleTextAttribute(hStdout, wAttr2);
 }
 
 void Combo::changeTextColorUp(int i, HANDLE hStdout, DWORD wAttr1, DWORD wAttr2, DWORD wAttr3, DWORD wAttr4)
 {
-	COORD c[] = { { 7, 8 },{ 7,9 },{ 7,10 } };
 	printLines(hStdout, wAttr1, wAttr2);
 	SetConsoleTextAttribute(hStdout, wAttr3);
 	SetConsoleTextAttribute(hStdout, wAttr4);
-	SetConsoleCursorPosition(hStdout, c[i - 1]);
-	cout << list.at(i - 1);
+	if (i == 0) {
+		SetConsoleCursorPosition(hStdout, c[i + 1]);
+		cout << list.at(i);
+	}
+	else {
+		SetConsoleCursorPosition(hStdout, c[i]);
+		cout << list.at(i - 1);
+	}
 	SetConsoleTextAttribute(hStdout, wAttr1);
 	SetConsoleTextAttribute(hStdout, wAttr2);
 }
-
-Combo::~Combo() {};

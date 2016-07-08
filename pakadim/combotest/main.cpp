@@ -1,26 +1,19 @@
 #include <windows.h>
 #include <stdio.h>
 #include "combobox.h"
-#include "iControl.h"
-#include "panel.h"
-#include "Label.h"
-#include "Button.h"
 
 HANDLE hStdin;
 HANDLE hStdout;
 DWORD fdwSaveOldMode;
+int line = 7;
 
 int main(VOID)
 {
 	DWORD cNumRead, fdwMode, i;
 	INPUT_RECORD irInBuf[128];
 	int counter = 0;
-	
-	Combo *combo = new Combo(5, { "1990", "1991", "1992", "1993" });
-	//combo->draw();
-	Panel panel(30, 30);
-	panel.AddiControl(*combo, 2, 3);
-	panel.draw();
+	Combo* combo = new Combo({ "1990", "1991", "1992", "1993" });
+
 	// Get the standard input handle. 
 
 	hStdin = GetStdHandle(STD_INPUT_HANDLE);
@@ -56,11 +49,11 @@ int main(VOID)
 			switch (irInBuf[i].EventType)
 			{
 			case KEY_EVENT: // keyboard input 
-				combo->KeyEventProc(irInBuf[i].Event.KeyEvent, hStdout);
+				combo->KeyEventProc(irInBuf[i].Event.KeyEvent, hStdout, line);
 				break;
 
 			case MOUSE_EVENT: // mouse input 
-				combo->MouseEventProc(irInBuf[i].Event.MouseEvent, hStdout);
+				combo->MouseEventProc(irInBuf[i].Event.MouseEvent, hStdout, line);
 				break;
 
 			case WINDOW_BUFFER_SIZE_EVENT: // scrn buf. resizing 

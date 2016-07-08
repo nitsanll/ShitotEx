@@ -5,28 +5,34 @@
 #include <iostream>
 #include <vector>
 #include "iControl.h"
+#include "panel.h"
+#include "Label.h"
+#include "Button.h"
 using namespace std;
 
-class Combo : public iControl
+class Combo : public Panel
 {
-private:
+protected:
 	vector<string> list;
 	string choice;
 	string deafult;
+	Label label;
+	Button button;
+	COORD c[];
 
 public:
-	Combo();
-	~Combo();
+	Combo(int width, vector<string> entries);
+	~Combo() {};
 	vector<string> getList();
-	string getDeafult();
-	void setDeafult(string);
 	void draw();
-	void MouseEventProc(MOUSE_EVENT_RECORD, HANDLE, int);
-	void KeyEventProc(KEY_EVENT_RECORD, HANDLE, int);
+	void MouseEventProc(MOUSE_EVENT_RECORD, HANDLE);
+	void KeyEventProc(KEY_EVENT_RECORD, HANDLE);
 	void printLines(HANDLE, DWORD, DWORD);
-	void eraseLines(string, int, HANDLE);
+	void eraseLines(int, HANDLE);
 	void changeTextColorDown(int, HANDLE, DWORD, DWORD, DWORD, DWORD);
 	void changeTextColorUp(int, HANDLE, DWORD, DWORD, DWORD, DWORD);
+	size_t GetSelectedIndex();
+	void SetSelectedIndex(size_t index);
 };
 
 #endif

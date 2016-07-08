@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9444462C-A418-4501-82F0-EE488462DECA}</ProjectGuid>
+    <ProjectGuid>{5CF2EFB2-2E6C-4F58-BBAD-6A4E0F9DEF50}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>ComboBox</RootNamespace>
+    <RootNamespace>combotest</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -142,21 +142,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Button.cpp" />
-    <ClCompile Include="combobox.cpp" />
-    <ClCompile Include="iControl.cpp" />
-    <ClCompile Include="Label.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="panel.cpp" />
-    <ClCompile Include="TextBox.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Button.h" />
     <ClInclude Include="combobox.h" />
     <ClInclude Include="iControl.h" />
-    <ClInclude Include="Label.h" />
-    <ClInclude Include="panel.h" />
-    <ClInclude Include="TextBox.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="combobox.cpp" />
+    <ClCompile Include="iControl.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

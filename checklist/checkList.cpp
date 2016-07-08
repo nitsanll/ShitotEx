@@ -11,8 +11,8 @@ void CheckList::draw(void)
 	vector<string> myList = { "[ ]hello", "[ ] hi", "[ ]love" };
 	list = myList;
 
-	int startLine = 7;
-	int newLineY = startLine;
+	short startLine = 7;
+	short newLineY = startLine;
 
 	COORD c;
 	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -42,7 +42,7 @@ VOID CheckList::KeyEventProc(KEY_EVENT_RECORD ker, HANDLE hConsoleOutput, int li
 	GetConsoleScreenBufferInfo(hConsoleOutput, &cbsi);
 
 
-	int newLineY = line;
+	short newLineY = line;
 	for (int i = 0; i < list.size(); i++)
 	{
 		int wasChoosen = 0;
